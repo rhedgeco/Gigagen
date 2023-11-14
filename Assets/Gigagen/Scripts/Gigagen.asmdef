@@ -1,0 +1,16 @@
+{
+    "name": "Gigagen",
+    "rootNamespace": "",
+    "references": [
+        "GUID:fc539e4b7aef9a054bad3972f708e364"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

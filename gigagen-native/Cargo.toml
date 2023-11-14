@@ -1,0 +1,15 @@
+[package]
+name = "gigagen"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[build-dependencies]
+glob = "0.3"
+cbindgen = "0.26"
+csbindgen = "1.8.0"
+
+[dependencies]
+glam = "0.24"

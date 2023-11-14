@@ -1,0 +1,5 @@
+# ignore generated files
+/Plugins/
+/Plugins.meta
+/Scripts/Native.cs
+/Scripts/Native.cs.meta

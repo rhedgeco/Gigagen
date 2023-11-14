@@ -10,12 +10,14 @@ namespace Gigagen
     {
         [SerializeField] private byte viewDistance = 8;
         [SerializeField] [Min(1f)] private float chunkSize = 32;
+        [SerializeField] private ushort chunkDivisor = 32;
         [SerializeField] [Min(1)] private int chunkLoadsPerFrame = 8;
 
         private unsafe Native.GigaWorld* _nativePtr;
         private Vector3 _currentWorldCenter;
         private byte _currentViewDistance;
         private float _currentChunkSize;
+        private ushort _currentChunkDiv;
         private Vector3[] _chunkPool;
 
         private void Awake()
@@ -23,11 +25,13 @@ namespace Gigagen
             _currentWorldCenter = transform.position;
             _currentViewDistance = viewDistance;
             _currentChunkSize = chunkSize;
+            _currentChunkDiv = chunkDivisor;
             ReloadChunkPool();
             unsafe
             {
                 var nativeWorldCenter = UnsafeUtility.As<Vector3, Vec3>(ref _currentWorldCenter);
-                _nativePtr = Func.create_world(nativeWorldCenter, _currentViewDistance, _currentChunkSize);
+                _nativePtr = Func.create_world(nativeWorldCenter, _currentViewDistance,
+                    _currentChunkSize, _currentChunkDiv);
             }
         }
 
@@ -55,14 +59,16 @@ namespace Gigagen
 
         private void ReloadChunkData()
         {
-            if (_currentViewDistance == viewDistance && Math.Abs(_currentChunkSize - chunkSize) < 0.1) return;
+            if (_currentViewDistance == viewDistance && Math.Abs(_currentChunkSize - chunkSize) < 0.1 &&
+                _currentChunkDiv == chunkDivisor) return;
             Profiler.BeginSample("Reload Chunk Data");
             _currentViewDistance = viewDistance;
             _currentChunkSize = chunkSize;
+            _currentChunkDiv = chunkDivisor;
             ReloadChunkPool();
             unsafe
             {
-                Func.set_world_data(_nativePtr, _currentViewDistance, _currentChunkSize);
+                Func.set_world_data(_nativePtr, _currentViewDistance, _currentChunkSize, _currentChunkDiv);
             }
 
             Profiler.EndSample();

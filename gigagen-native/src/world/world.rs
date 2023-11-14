@@ -1,24 +1,29 @@
 use glam::Vec3;
 
+use crate::GigaNode;
+
 pub struct LoadedChunk {
-    pub index: usize,
     pub pos: Vec3,
+    pub index: usize,
+    pub nodes: Box<[GigaNode]>,
 }
 
 pub struct GigaWorld {
     center: Vec3,
     view_dist: u8,
     chunk_size: f32,
+    chunk_div: u16,
     unloaded: Vec<ChunkData>,
     loaded: Vec<ChunkData>,
 }
 
 impl GigaWorld {
-    pub fn new(center: Vec3, view_dist: u8, chunk_size: f32) -> Self {
+    pub fn new(center: Vec3, view_dist: u8, chunk_size: f32, chunk_div: u16) -> Self {
         let mut world = Self {
             center,
             view_dist,
-            chunk_size,
+            chunk_size: chunk_size.max(1.),
+            chunk_div,
             unloaded: Vec::new(),
             loaded: Vec::new(),
         };
@@ -26,19 +31,37 @@ impl GigaWorld {
         world
     }
 
+    pub fn view_dist(&self) -> u8 {
+        self.view_dist
+    }
+
     pub fn set_view_dist(&mut self, view_dist: u8) {
         self.view_dist = view_dist;
         self.rebuild_chunk_vecs();
     }
 
+    pub fn chunk_size(&self) -> f32 {
+        self.chunk_size
+    }
+
     pub fn set_chunk_size(&mut self, chunk_size: f32) {
-        self.chunk_size = chunk_size;
+        self.chunk_size = chunk_size.max(1.);
         self.rebuild_chunk_vecs();
     }
 
-    pub fn set_data(&mut self, view_dist: u8, chunk_size: f32) {
+    pub fn chunk_div(&self) -> u16 {
+        self.chunk_div
+    }
+
+    pub fn set_chunk_div(&mut self, chunk_div: u16) {
+        self.chunk_div = chunk_div;
+        self.rebuild_chunk_vecs();
+    }
+
+    pub fn set_data(&mut self, view_dist: u8, chunk_size: f32, chunk_div: u16) {
         self.view_dist = view_dist;
-        self.chunk_size = chunk_size;
+        self.chunk_size = chunk_size.max(1.);
+        self.chunk_div = chunk_div;
         self.rebuild_chunk_vecs();
     }
 
@@ -82,8 +105,9 @@ impl GigaWorld {
         let next_index = next_index?;
         let chunk_data = self.unloaded.swap_remove(next_index);
         let loaded_chunk = LoadedChunk {
-            index: chunk_data.global_index,
             pos: chunk_data.pos,
+            index: chunk_data.global_index,
+            nodes: Vec::new().into_boxed_slice(),
         };
         self.loaded.push(chunk_data);
         Some(loaded_chunk)

@@ -372,4 +372,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewDistance: 8
   chunkSize: 32
-  chunkLoadsPerFrame: 8
+  chunkDivisor: 32
+  maxChunkLoadsPerFrame: 0

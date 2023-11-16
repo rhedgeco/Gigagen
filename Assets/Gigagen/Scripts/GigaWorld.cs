@@ -66,11 +66,9 @@ namespace Gigagen
                 var chunkCenter = chunk.Position + halfChunkSize;
 
                 // set color to red if chunk is out of range
-                if (Mathf.Abs(chunkCenter.x - _currentWorldCenter.x) < maxDistance &&
-                    Mathf.Abs(chunkCenter.y - _currentWorldCenter.y) < maxDistance &&
-                    Mathf.Abs(chunkCenter.z - _currentWorldCenter.z) < maxDistance)
-                    Gizmos.color = new Color(1, 1, 0, 0.2f);
-                else Gizmos.color = new Color(1, 0, 0, 0.2f);
+                Gizmos.color = Vector3.Distance(chunkCenter, _currentWorldCenter) < maxDistance
+                    ? new Color(1, 1, 0, 0.2f)
+                    : new Color(1, 0, 0, 0.1f);
 
                 Gizmos.DrawWireCube(chunkCenter, chunkSizeVector);
             }

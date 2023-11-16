@@ -27,6 +27,8 @@ namespace Gigagen
             Unload();
         }
 
+        public Mesh Mesh { get; } = new();
+
         public bool Completed
         {
             get

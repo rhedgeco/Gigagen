@@ -4,7 +4,7 @@ use glam::Vec3;
 use rayon::prelude::*;
 
 use crate::{
-    chunk::{data::samplers::FlatSampler, mesh::builders::EmptyMeshBuilder, ChunkData},
+    chunk::{data::samplers::PerlinSampler, mesh::builders::SimpleMeshBuilder, ChunkData},
     world::{BackendCommand, BuilderBackend},
     GigaChunk,
 };
@@ -95,14 +95,16 @@ impl BuilderBackend for LocalBackend {
     }
 
     fn run(mut self) {
+        let sampler = PerlinSampler::new();
+        let mesher = SimpleMeshBuilder;
         let chunk_size = self.chunk_size;
         let chunk_div = self.chunk_div;
         let mesh_send = self.mesh_send.clone();
         loop {
             let backend_iter = LocalBackendIter { backend: &mut self };
             backend_iter.par_bridge().for_each(|chunk_pos| {
-                let chunk_data = ChunkData::new(chunk_pos.pos, chunk_size, chunk_div, &FlatSampler);
-                let chunk = GigaChunk::new(chunk_pos.chunk_index, chunk_data, &EmptyMeshBuilder);
+                let chunk_data = ChunkData::new(chunk_pos.pos, chunk_size, chunk_div, &sampler);
+                let chunk = GigaChunk::new(chunk_pos.chunk_index, chunk_data, &mesher);
                 if let Err(_) = mesh_send.send(chunk) {
                     println!("failed to send completed mesh. channel is closed.");
                 }
@@ -211,9 +213,13 @@ impl<'a> Iterator for LocalBackendIter<'a> {
         // find the closest chunk to the center of the world
         let mut next_index = None;
         let mut min_dist = f32::MAX;
+        let max_dist = self.backend.view_dist as f32 * self.backend.chunk_size;
         let half_chunk = Vec3::ONE * self.backend.chunk_size / 2.;
         for (index, chunk_data) in self.backend.unloaded.iter().enumerate() {
             let chunk_dist = (chunk_data.pos + half_chunk).distance(self.backend.center);
+            if chunk_dist > max_dist {
+                continue;
+            }
             if chunk_dist < min_dist {
                 next_index = Some(index);
                 min_dist = chunk_dist;

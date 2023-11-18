@@ -1,9 +1,11 @@
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace Gigagen
 {
     public class GigaWorld : MonoBehaviour
     {
+        [SerializeField] private Transform targetCenter;
         [SerializeField] private byte viewDistance = 8;
         [SerializeField] [Min(1f)] private float chunkSize = 32;
         [SerializeField] private byte chunkDivisor = 32;
@@ -12,19 +14,22 @@ namespace Gigagen
 
         private void Awake()
         {
-            _worldBuilder = WorldBuilder.CreateLocal(transform.position, viewDistance, chunkSize, chunkDivisor);
+            var threadCount = JobsUtility.JobWorkerMaximumCount - 2;
+            var initialCenter = targetCenter ? targetCenter.position : Vector3.zero;
+            _worldBuilder = WorldBuilder.CreateLocal(initialCenter, viewDistance, chunkSize, chunkDivisor, threadCount);
         }
 
         private void Update()
         {
-            _worldBuilder.SetWorldCenter(transform.position);
-            _worldBuilder.PullChunkUpdates();
+            if (targetCenter) _worldBuilder.SetWorldCenter(targetCenter.position);
+            _worldBuilder.PullCompletedChunks();
         }
 
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(0, 1, 0, 0.5f);
-            Gizmos.DrawWireSphere(transform.position, viewDistance * chunkSize);
+            var worldCenter = targetCenter ? targetCenter.position : Vector3.zero;
+            Gizmos.DrawWireSphere(worldCenter, viewDistance * chunkSize);
             _worldBuilder?.DrawChunkGizmos();
         }
     }

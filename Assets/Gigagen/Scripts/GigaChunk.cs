@@ -2,26 +2,22 @@ using System;
 using System.Runtime.InteropServices;
 using Gigagen.Extensions;
 using Gigagen.Native;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
-using UnityEngine.Profiling;
-using UnityEngine.Rendering;
 
 namespace Gigagen
 {
-    public class ChunkData
+    public class GigaChunk
     {
-        private unsafe Native.ChunkData* _nativePtr;
+        private static long _memSize = -1;
+        private unsafe ChunkData* _nativePtr;
         private NodeSlice _nodeSlice;
 
-        public bool Loaded { get; private set; }
-
-        internal unsafe ChunkData(Native.ChunkData* nativePtr)
+        internal unsafe GigaChunk(ChunkData* nativePtr)
         {
-            Register(nativePtr);
+            Load(nativePtr);
         }
 
-        ~ChunkData()
+        ~GigaChunk()
         {
             unsafe
             {
@@ -29,13 +25,15 @@ namespace Gigagen
             }
         }
 
-        public int WorldIndex
+        public bool Loaded { get; private set; }
+
+        public int Index
         {
             get
             {
                 unsafe
                 {
-                    return (int)Func.get_chunk_world_index(_nativePtr);
+                    return (int)Func.get_chunk_index(_nativePtr);
                 }
             }
         }
@@ -86,7 +84,16 @@ namespace Gigagen
             }
         }
 
-        internal unsafe void Register(Native.ChunkData* nativePtr)
+        internal static long DataMemSize
+        {
+            get
+            {
+                if (_memSize == -1) _memSize = (long)Func.get_chunk_data_mem_size();
+                return _memSize;
+            }
+        }
+
+        internal unsafe void Load(ChunkData* nativePtr)
         {
             if ((UIntPtr)_nativePtr != UIntPtr.Zero) Func.dispose_chunk(_nativePtr);
             _nativePtr = nativePtr;

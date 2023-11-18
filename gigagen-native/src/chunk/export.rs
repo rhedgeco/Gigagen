@@ -1,14 +1,6 @@
-use std::alloc::Layout;
-
 use crate::{export_utils::vec3::NativeVec3, ChunkData};
 
 use super::Node;
-
-#[no_mangle]
-unsafe extern "C" fn get_chunk_data_mem_size() -> usize {
-    let layout = Layout::new::<ChunkData>().pad_to_align();
-    layout.size()
-}
 
 #[no_mangle]
 unsafe extern "C" fn dispose_chunk(chunk_data: *mut ChunkData) {

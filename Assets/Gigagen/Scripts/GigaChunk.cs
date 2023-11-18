@@ -8,7 +8,6 @@ namespace Gigagen
 {
     public class GigaChunk
     {
-        private static long _memSize = -1;
         private unsafe ChunkData* _nativePtr;
         private NodeSlice _nodeSlice;
 
@@ -84,26 +83,12 @@ namespace Gigagen
             }
         }
 
-        internal static long DataMemSize
-        {
-            get
-            {
-                if (_memSize == -1) _memSize = (long)Func.get_chunk_data_mem_size();
-                return _memSize;
-            }
-        }
-
         internal unsafe void Load(ChunkData* nativePtr)
         {
             if ((UIntPtr)_nativePtr != UIntPtr.Zero) Func.dispose_chunk(_nativePtr);
             _nativePtr = nativePtr;
             _nodeSlice = Func.get_chunk_nodes(_nativePtr);
             Loaded = true;
-        }
-
-        internal void MarkUnloaded()
-        {
-            Loaded = false;
         }
 
         [StructLayout(LayoutKind.Sequential)]

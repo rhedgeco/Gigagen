@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Gigagen.Extensions;
 using Gigagen.Native;
 using Unity.Jobs.LowLevel.Unsafe;
@@ -31,15 +29,15 @@ namespace Gigagen
             }
         }
 
-        public static WorldBuilder CreateLocal(Vector3 center, byte viewDist, float chunkSize, byte chunkDiv,
+        public static WorldBuilder CreateLocal(Vector3 center, byte viewDistance, float chunkSize, byte chunkDivisor,
             int threadCount = 0)
         {
             unsafe
             {
                 var maxThreads = JobsUtility.JobWorkerMaximumCount;
                 var clampedThreadCount = Mathf.Clamp(threadCount, 1, maxThreads);
-                var nativePtr = Func.create_local_world_builder(center.ToNative(), viewDist, chunkSize, chunkDiv,
-                    (nuint)clampedThreadCount);
+                var nativePtr = Func.create_local_world_builder(center.ToNative(), viewDistance, chunkSize,
+                    chunkDivisor, (nuint)clampedThreadCount);
                 return new WorldBuilder(nativePtr);
             }
         }

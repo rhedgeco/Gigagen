@@ -12,7 +12,7 @@ pub trait NodeSampler {
 }
 
 pub struct ChunkData {
-    world_index: usize,
+    index: usize,
     nodes: Box<[Node]>,
     pos: Vec3,
     size: f32,
@@ -34,13 +34,7 @@ impl Index<usize> for ChunkData {
 }
 
 impl ChunkData {
-    pub fn new(
-        world_index: usize,
-        pos: Vec3,
-        size: f32,
-        div: u8,
-        sampler: &impl NodeSampler,
-    ) -> Self {
+    pub fn new(index: usize, pos: Vec3, size: f32, div: u8, sampler: &impl NodeSampler) -> Self {
         let axis_nodes = div as usize + 2;
         let node_size = size / (div as f32 + 1.);
         let node_count = axis_nodes * axis_nodes * axis_nodes;
@@ -62,7 +56,7 @@ impl ChunkData {
         }
 
         Self {
-            world_index,
+            index,
             nodes: nodes.into_boxed_slice(),
             pos,
             size,
@@ -70,8 +64,8 @@ impl ChunkData {
         }
     }
 
-    pub fn world_index(&self) -> usize {
-        self.world_index
+    pub fn index(&self) -> usize {
+        self.index
     }
 
     pub fn pos(&self) -> &Vec3 {

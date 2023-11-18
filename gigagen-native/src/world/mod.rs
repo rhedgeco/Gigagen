@@ -1,6 +1,6 @@
 mod export;
-mod world;
 
 pub mod backends;
+pub mod builder;
 
-pub use world::*;
+pub use builder::WorldBuilder;
